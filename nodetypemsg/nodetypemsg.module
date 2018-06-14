@@ -1,0 +1,39 @@
+<?php
+
+/** 
+Implementing hook_form_BASE_FORM_ID_alter  
+*/
+function nodetypemsg_form_node_type_form_alter(&$form, &$form_state, $form_id){
+ 
+  $ntype = $form['#node_type']->type;
+  $ntypemsg = '';
+  if(!empty($ntype)) 
+      $ntypemsg = variable_get($ntype.'_msg');
+ 
+  $form['nodetype_msg'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Message'),
+      '#required' => TRUE,
+      '#default_value' => $ntypemsg,
+      '#format' => 'filtered_html',
+      '#base_type' => 'textarea',
+      '#weight' => 0
+
+  );
+   $form['#submit'][] = '__saveNodeMessge';
+
+}
+/* Implementing hook_node_view*/
+function nodetypemsg_node_view($node, $view_mode, $langcode) { 
+  $ntype_msg = variable_get($node->type.'_msg'); 
+  if(!empty($ntype_msg)) drupal_set_message($ntype_msg, 'status', FALSE);  
+}
+
+/* Save Messgae*/
+function __saveNodeMessge($form, &$form_state){  
+  $ntype = $form['#node_type']->type;
+  if(!empty($form_state['values']['nodetype_msg']['value'])){
+     variable_set($ntype.'_msg', filter_xss($form_state['values']['nodetype_msg']['value']));
+  }
+  
+}  

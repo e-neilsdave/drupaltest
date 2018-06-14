@@ -1,0 +1,26 @@
+<?php
+function stickyheader_block_info () {
+    return [
+        'sticky_header_block' => [
+            'info'       => "Sticky Header",
+            'region'     => 'sticky_header',
+            'visibility' => BLOCK_VISIBILITY_NOTLISTED
+        ]
+    ];
+}
+
+function stickyheader_block_view ($delta = '') {
+    $node = node_load(arg(1));
+    
+    $block = array();
+    if ($delta == 'sticky_header_block' ) {
+        /* ... do my stuff .... */
+        $block['title'] = '<none>'; // Undocumented, but works.
+         // This will not behave as desired.
+        $block['subject'] = '<none>';
+		$block['content'] =  @$node->title;
+    }
+
+    return $block;
+}
+?>

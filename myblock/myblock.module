@@ -1,0 +1,57 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function myblock_block_info() {
+  $blocks['myblock-primenodes'] = array(
+    'info' => t('My Custom Block to display PRIM Nodes'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function myblock_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'myblock-primenodes':
+    if (user_access('access content')) {
+      $block['subject'] = t('Prime Node');
+      if ($nodes = __getNodes(5)) {
+          $block['content'] = array(
+          	"#markup" =>theme('node_recent_block', array('nodes' => $nodes,)),
+          	 /* Attached Custom JS and CSS File*/ 
+          	'#attached' => array(
+          		'css' => array(drupal_get_path('module', 'myblock') . '/css/myblock.css'),
+          		'js' => array(drupal_get_path('module', 'myblock') . '/js/myblock.js')
+          	 )
+          );
+        } else {
+          $block['content'] = t('No content available.');
+        }
+    }
+      break;
+  }
+  return $block;
+}
+
+/*Utility Funciton to check Prime NODE ID*/
+function __checkPrime($n){
+	for($i=$n>>1;$i&&$n%$i--;);return!$i&&$n>1;
+}
+/*Get List of Prime Node*/
+function __getNodes($number = 5) { //echo "here";exit;
+ 
+	$query = db_query("SELECT nid,DAYOFMONTH(FROM_UNIXTIME(created)) as day  FROM {node} WHERE status = :status",array(':status' => NODE_PUBLISHED));
+	$records = $query->fetchAll();
+	
+	$nids = array();
+	foreach ($records as $record) {
+		if(__checkPrime($record->day))array_push($nids, $record->nid);
+	}
+	//echo "<pre>ss";print_r($nids) ;exit;
+	return (count($nids)) ? $nodes = node_load_multiple($nids) : array();
+	//return $nodes ? $nodes : array();
+}
